@@ -22,8 +22,7 @@ $investmentQuery = mysqli_query($conn,
      FROM client_assets 
      WHERE client_id = $client_id"
 );
-$investmentData = mysqli_fetch_assoc($investmentQuery);
-$total_investment = $investmentData['total_investment'] ?? 0;
+$total_investment = mysqli_fetch_assoc($investmentQuery)['total_investment'] ?? 0;
 
 // Total Net Worth
 $netQuery = mysqli_query($conn, 
@@ -31,10 +30,8 @@ $netQuery = mysqli_query($conn,
      FROM client_assets 
      WHERE client_id = $client_id"
 );
-$netData = mysqli_fetch_assoc($netQuery);
-$total_net = $netData['total_net'] ?? 0;
+$total_net = mysqli_fetch_assoc($netQuery)['total_net'] ?? 0;
 
-// Profit / Loss
 $profit_loss = $total_net - $total_investment;
 
 // Total Assets
@@ -43,27 +40,52 @@ $countQuery = mysqli_query($conn,
      FROM client_assets 
      WHERE client_id = $client_id"
 );
-$countData = mysqli_fetch_assoc($countQuery);
-$total_assets = $countData['total_assets'];
-
+$total_assets = mysqli_fetch_assoc($countQuery)['total_assets'];
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Client Dashboard</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
             background-color: #f4f6f9;
         }
+
         .card {
             border-radius: 12px;
         }
-        .navbar {
-            border-radius: 0 0 12px 12px;
+
+        /* Blur Effect */
+        .blur-background {
+            filter: blur(5px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Modal */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 420px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -80,9 +102,15 @@ $total_assets = $countData['total_assets'];
     </div>
 </nav>
 
+<!-- WRAP ALL CONTENT -->
+<div id="dashboard-content">
+
 <div class="container mt-4">
 
-    <h4 class="mb-4">Portfolio Overview</h4>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>Portfolio Overview</h4>
+        <a href="add_asset.php" class="btn btn-primary">+ Add Asset</a>
+    </div>
 
     <!-- SUMMARY CARDS -->
     <div class="row">
@@ -90,18 +118,14 @@ $total_assets = $countData['total_assets'];
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm p-3">
                 <h6>Total Investment</h6>
-                <h4 class="text-primary">
-                    ₹ <?php echo number_format($total_investment, 2); ?>
-                </h4>
+                <h4 class="text-primary">₹ <?php echo number_format($total_investment, 2); ?></h4>
             </div>
         </div>
 
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm p-3">
                 <h6>Total Net Worth</h6>
-                <h4 class="text-success">
-                    ₹ <?php echo number_format($total_net, 2); ?>
-                </h4>
+                <h4 class="text-success">₹ <?php echo number_format($total_net, 2); ?></h4>
             </div>
         </div>
 
@@ -117,19 +141,15 @@ $total_assets = $countData['total_assets'];
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm p-3">
                 <h6>Total Assets</h6>
-                <h4 class="text-dark">
-                    <?php echo $total_assets; ?>
-                </h4>
+                <h4><?php echo $total_assets; ?></h4>
             </div>
         </div>
 
     </div>
 
-    <!-- RECENT ASSETS TABLE -->
+    <!-- RECENT ASSETS -->
     <div class="card mt-4 shadow-sm">
-        <div class="card-header bg-light">
-            Recent Assets
-        </div>
+        <div class="card-header bg-light">Recent Assets</div>
         <div class="card-body">
 
             <table class="table table-bordered table-striped">
@@ -142,6 +162,7 @@ $total_assets = $countData['total_assets'];
                     </tr>
                 </thead>
                 <tbody>
+
                 <?php
                 $assetsQuery = mysqli_query($conn, 
                     "SELECT asset_name, purchase_value, current_value, purchase_date 
@@ -163,6 +184,7 @@ $total_assets = $countData['total_assets'];
                     echo "<tr><td colspan='4' class='text-center'>No assets added yet.</td></tr>";
                 }
                 ?>
+
                 </tbody>
             </table>
 
@@ -170,6 +192,5 @@ $total_assets = $countData['total_assets'];
     </div>
 
 </div>
-
 </body>
 </html>
